@@ -81,19 +81,21 @@ class ciWMFVideoPlayer
 		void stop();
 		void pause();
 
-		float getPosition();
-		float getDuration();
-		float getFrameRate();
+		double getPosition() const;
+		double getDuration() const;
+		double getFrameRate() const;
 
-		void setPosition( float pos );
+		void setPosition( double pos );
 		void stepForward();
 
-		float getHeight();
-		float getWidth();
+		int getHeight() const;
+		int getWidth() const;
 
-		bool isPlaying();
-		bool isStopped();
-		bool isPaused();
+		bool isPlaying() const;
+		bool isStopped() const;
+		bool isPaused() const;
+
+		bool hasTexture() const { return ( mPlayer && mTex ); }
 
 		bool setSpeed( float speed, bool useThinning = false ); //thinning drops delta frames for faster playback though appears to be choppy, default is false
 		float getSpeed();

@@ -166,7 +166,7 @@ void ciWMFVideoPlayer::draw( int x, int y, int w, int h )
 	mPlayer->mEVRPresenter->lockSharedTexture();
 
 	if( mTex ) {
-		Rectf destRect = Rectf( x, y, x + w, y + h );
+		Rectf destRect = Rectf( float(x), float(y), float(x + w), float(y + h) );
 
 		switch( mVideoFill ) {
 			case VideoFill::FILL:
@@ -187,17 +187,17 @@ void ciWMFVideoPlayer::draw( int x, int y, int w, int h )
 	mPlayer->mEVRPresenter->unlockSharedTexture();
 }
 
-bool ciWMFVideoPlayer::isPlaying()
+bool ciWMFVideoPlayer::isPlaying() const
 {
 	return mPlayer->GetState() == STARTED;
 }
 
-bool ciWMFVideoPlayer::isStopped()
+bool ciWMFVideoPlayer::isStopped() const
 {
 	return ( mPlayer->GetState() == STOPPED || mPlayer->GetState() == PAUSED );
 }
 
-bool ciWMFVideoPlayer::isPaused()
+bool ciWMFVideoPlayer::isPaused() const
 {
 	return mPlayer->GetState() == PAUSED;
 }
@@ -238,22 +238,22 @@ void ciWMFVideoPlayer::pause()
 	mPlayer->Pause();
 }
 
-float ciWMFVideoPlayer::getPosition()
+double ciWMFVideoPlayer::getPosition() const
 {
 	return mPlayer->getPosition();
 }
 
-float ciWMFVideoPlayer::getFrameRate()
+double ciWMFVideoPlayer::getFrameRate() const
 {
 	return mPlayer->getFrameRate();
 }
 
-float ciWMFVideoPlayer::getDuration()
+double ciWMFVideoPlayer::getDuration() const
 {
 	return mPlayer->getDuration();
 }
 
-void ciWMFVideoPlayer::setPosition( float pos )
+void ciWMFVideoPlayer::setPosition( double pos )
 {
 	mPlayer->setPosition( pos );
 }
@@ -265,10 +265,10 @@ void ciWMFVideoPlayer::stepForward()
 	}
 
 	mPlayer->Pause();
-	float fps = mPlayer->getFrameRate();
-	float step = 1 / fps;
-	float currentVidPos = mPlayer->getPosition();
-	float targetVidPos = currentVidPos + step;
+	double fps = mPlayer->getFrameRate();
+	double step = 1.0 / fps;
+	double currentVidPos = mPlayer->getPosition();
+	double targetVidPos = currentVidPos + step;
 
 	if  (mPlayer->GetState() == PAUSED) {
 		play();
@@ -339,13 +339,12 @@ bool ciWMFVideoPlayer::setSpeed( float speed, bool useThinning )
 
 PresentationEndedSignal& ciWMFVideoPlayer::getPresentationEndedSignal()
 {
-	if( mPlayer ) {
-		return mPlayer->getPresentationEndedSignal();
-	}
+	assert( mPlayer );
+	return mPlayer->getPresentationEndedSignal();
 }
 
-float ciWMFVideoPlayer::getHeight() { return mPlayer->getHeight(); }
-float ciWMFVideoPlayer::getWidth() { return mPlayer->getWidth(); }
+int ciWMFVideoPlayer::getHeight() const { return mPlayer->getHeight(); }
+int ciWMFVideoPlayer::getWidth() const { return mPlayer->getWidth(); }
 void  ciWMFVideoPlayer::setLoop( bool isLooping ) { mIsLooping = isLooping; mPlayer->setLooping( isLooping ); }
 
 //-----------------------------------
