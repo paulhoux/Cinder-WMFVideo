@@ -9,9 +9,6 @@ using namespace std;
 using namespace ci;
 using namespace ci::app;
 
-typedef std::pair<HWND, ciWMFVideoPlayer*> PlayerItem;
-list<PlayerItem> g_WMFVideoPlayers;
-
 LRESULT CALLBACK WndProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
 // Message handlers
 
@@ -29,18 +26,6 @@ ciWMFVideoPlayer::ScopedVideoTextureBind::~ScopedVideoTextureBind()
 {
 	mCtx->popTextureBinding( mTarget, mTextureUnit );
 	mPlayer->mEVRPresenter->unlockSharedTexture();
-}
-
-ciWMFVideoPlayer *findPlayers( HWND hwnd )
-{
-	for( auto &e : g_WMFVideoPlayers )
-		{
-			if( e.first == hwnd ) {
-				return e.second;
-			}
-		}
-
-	return NULL;
 }
 
 int  ciWMFVideoPlayer::mInstanceCount = 0;
@@ -376,19 +361,27 @@ void ciWMFVideoPlayer::OnPlayerEvent( HWND hwnd, WPARAM pUnkPtr )
 
 LRESULT CALLBACK WndProcDummy( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
+	ciWMFVideoPlayer *impl = NULL;
+
+	// If the message is WM_NCCREATE we need to hide 'this' in the window long.
+	if( message == WM_NCCREATE ) {
+		impl = reinterpret_cast<ciWMFVideoPlayer*>( ( (LPCREATESTRUCT)lParam )->lpCreateParams );
+		::SetWindowLongPtr( hwnd, GWLP_USERDATA, (__int3264)(LONG_PTR)impl );
+	}
+	else
+		impl = reinterpret_cast<ciWMFVideoPlayer*>( ::GetWindowLongPtr( hwnd, GWLP_USERDATA ) );
+
 	switch( message ) {
 		case WM_CREATE: {
 			return DefWindowProc( hwnd, message, wParam, lParam );
 		}
 
 		default: {
-			ciWMFVideoPlayer*   myPlayer = findPlayers( hwnd );
-
-			if( !myPlayer ) {
+			if( !impl ) {
 				return DefWindowProc( hwnd, message, wParam, lParam );
 			}
 
-			return myPlayer->WndProc( hwnd, message, wParam, lParam );
+			return impl->WndProc( hwnd, message, wParam, lParam );
 		}
 	}
 
@@ -438,13 +431,12 @@ BOOL ciWMFVideoPlayer::InitInstance()
 
 	// Create the application window.
 	hwnd = CreateWindow( szWindowClass, L"", WS_OVERLAPPEDWINDOW,
-	                     CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, NULL, NULL );
+	                     CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, NULL, reinterpret_cast<LPVOID>( this ) );
 
 	if( hwnd == 0 ) {
 		return FALSE;
 	}
 
-	g_WMFVideoPlayers.push_back( std::pair<HWND, ciWMFVideoPlayer*>( hwnd, this ) );
 	HRESULT hr = CPlayer::CreateInstance( hwnd, hwnd, &mPlayer );
 
 	LONG style2 = ::GetWindowLong( hwnd, GWL_STYLE );
