@@ -31,11 +31,14 @@ ciWMFVideoPlayer::ScopedVideoTextureBind::~ScopedVideoTextureBind()
 	mPlayer->mEVRPresenter->unlockSharedTexture();
 }
 
-ciWMFVideoPlayer* findPlayers( HWND hwnd )
+ciWMFVideoPlayer *findPlayers( HWND hwnd )
 {
-	for each( PlayerItem e in g_WMFVideoPlayers ) {
-		if( e.first == hwnd ) { return e.second; }
-	}
+	for( auto &e : g_WMFVideoPlayers )
+		{
+			if( e.first == hwnd ) {
+				return e.second;
+			}
+		}
 
 	return NULL;
 }
@@ -163,7 +166,7 @@ void ciWMFVideoPlayer::draw( int x, int y, int w, int h )
 		return;
 	}
 
-	mPlayer->mEVRPresenter->lockSharedTexture();
+	bool success = mPlayer->mEVRPresenter->lockSharedTexture();
 
 	if( mTex ) {
 		Rectf destRect = Rectf( float(x), float(y), float(x + w), float(y + h) );
@@ -184,7 +187,7 @@ void ciWMFVideoPlayer::draw( int x, int y, int w, int h )
 
 	}
 
-	mPlayer->mEVRPresenter->unlockSharedTexture();
+	success = mPlayer->mEVRPresenter->unlockSharedTexture();
 }
 
 bool ciWMFVideoPlayer::isPlaying() const
@@ -260,7 +263,7 @@ void ciWMFVideoPlayer::setPosition( double pos )
 
 void ciWMFVideoPlayer::stepForward()
 {
-	if (mPlayer->GetState() == STOPPED) {
+	if( mPlayer->GetState() == STOPPED ) {
 		return;
 	}
 
@@ -343,9 +346,19 @@ PresentationEndedSignal& ciWMFVideoPlayer::getPresentationEndedSignal()
 	return mPlayer->getPresentationEndedSignal();
 }
 
-int ciWMFVideoPlayer::getHeight() const { return mPlayer->getHeight(); }
-int ciWMFVideoPlayer::getWidth() const { return mPlayer->getWidth(); }
-void  ciWMFVideoPlayer::setLoop( bool isLooping ) { mIsLooping = isLooping; mPlayer->setLooping( isLooping ); }
+int ciWMFVideoPlayer::getHeight() const
+{
+	return mPlayer->getHeight();
+}
+int ciWMFVideoPlayer::getWidth() const
+{
+	return mPlayer->getWidth();
+}
+void ciWMFVideoPlayer::setLoop( bool isLooping )
+{
+	mIsLooping = isLooping;
+	mPlayer->setLooping( isLooping );
+}
 
 //-----------------------------------
 // Prvate Functions
