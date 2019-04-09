@@ -18,6 +18,7 @@
 #include <intsafe.h>
 #include <math.h>
 
+#include <timeapi.h>
 #include <mfapi.h>
 #include <mfidl.h>
 #include <mferror.h>
