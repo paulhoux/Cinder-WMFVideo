@@ -560,7 +560,7 @@ HRESULT D3DPresentEngine::CreateD3DDevice()
 
     IDirect3DDevice9Ex* pDevice = NULL;
 
-    // Hold the lock because we might be discarding an exisiting device.
+    // Hold the lock because we might be discarding an existing device.
     AutoLock lock(m_ObjectLock);    
 
     if (!m_pD3D9 || !m_pDeviceManager)
@@ -568,7 +568,7 @@ HRESULT D3DPresentEngine::CreateD3DDevice()
         return MF_E_NOT_INITIALIZED;
     }
 
-    hwnd = GetDesktopWindow();
+    hwnd = GetForegroundWindow(); // GetDesktopWindow();
 
     // Note: The presenter creates additional swap chains to present the
     // video frames. Therefore, it does not use the device's implicit 
@@ -589,7 +589,18 @@ HRESULT D3DPresentEngine::CreateD3DDevice()
     // Find the monitor for this window.
     if (m_hwnd)
     {
-        hMonitor = MonitorFromWindow(m_hwnd, MONITOR_DEFAULTTONEAREST);
+        hMonitor = MonitorFromWindow(m_hwnd, MONITOR_DEFAULTTOPRIMARY /* MONITOR_DEFAULTTONEAREST */ );
+
+        // Obtain monitor info for debugging purposes.
+        MONITORINFOEXA mi;
+        mi.cbSize = sizeof(MONITORINFOEXA);
+
+        if( GetMonitorInfoA( hMonitor, &mi ) )
+        {
+            CI_LOG_I( "Monitor used by D3DDevice: " << std::string( mi.szDevice ) );
+            CI_LOG_I( "Origin: " << mi.rcMonitor.left << "," << mi.rcMonitor.top );
+            CI_LOG_I( "Size: " << ( mi.rcMonitor.right - mi.rcMonitor.left ) << "x" << ( mi.rcMonitor.bottom - mi.rcMonitor.top ) );
+        }
 
         // Find the corresponding adapter.
         CHECK_HR(hr = FindAdapter(m_pD3D9, hMonitor, &uAdapterID));
