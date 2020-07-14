@@ -52,6 +52,7 @@ class ciWMFVideoPlayer
 
 		BOOL InitInstance();
 		void OnPlayerEvent( HWND hwnd, WPARAM pUnkPtr );
+		HWND mHwnd;
 
 	public:
 		friend struct ScopedVideoTextureBind;
