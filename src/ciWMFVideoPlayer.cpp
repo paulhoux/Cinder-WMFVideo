@@ -73,6 +73,7 @@ ciWMFVideoPlayer::~ciWMFVideoPlayer()
 	if( mInstanceCount == 0 ) {
 		MFShutdown();
 		CI_LOG_I( "Shutting down MF" );
+		DestroyWindow(mHwnd);
 	}
 }
 
@@ -410,7 +411,6 @@ LRESULT  ciWMFVideoPlayer::WndProc( HWND hwnd, UINT message, WPARAM wParam, LPAR
 BOOL ciWMFVideoPlayer::InitInstance()
 {
 	PCWSTR szWindowClass = L"MFBASICPLAYBACK" ;
-	HWND hwnd;
 	WNDCLASSEX wcex;
 
 	//   g_hInstance = hInst; // Store the instance handle.
@@ -430,27 +430,27 @@ BOOL ciWMFVideoPlayer::InitInstance()
 	}
 
 	// Create the application window.
-	hwnd = CreateWindow( szWindowClass, L"", WS_OVERLAPPEDWINDOW,
+	mHwnd = CreateWindow( szWindowClass, L"", WS_OVERLAPPEDWINDOW,
 	                     CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, NULL, reinterpret_cast<LPVOID>( this ) );
 
-	if( hwnd == 0 ) {
+	if( mHwnd == 0 ) {
 		return FALSE;
 	}
 
-	HRESULT hr = CPlayer::CreateInstance( hwnd, hwnd, &mPlayer );
+	HRESULT hr = CPlayer::CreateInstance( mHwnd, mHwnd, &mPlayer );
 
-	LONG style2 = ::GetWindowLong( hwnd, GWL_STYLE );
+	LONG style2 = ::GetWindowLong( mHwnd, GWL_STYLE );
 	style2 &= ~WS_DLGFRAME;
 	style2 &= ~WS_CAPTION;
 	style2 &= ~WS_BORDER;
 	style2 &= WS_POPUP;
-	LONG exstyle2 = ::GetWindowLong( hwnd, GWL_EXSTYLE );
+	LONG exstyle2 = ::GetWindowLong( mHwnd, GWL_EXSTYLE );
 	exstyle2 &= ~WS_EX_DLGMODALFRAME;
-	::SetWindowLong( hwnd, GWL_STYLE, style2 );
-	::SetWindowLong( hwnd, GWL_EXSTYLE, exstyle2 );
+	::SetWindowLong( mHwnd, GWL_STYLE, style2 );
+	::SetWindowLong( mHwnd, GWL_EXSTYLE, exstyle2 );
 
-	mHWNDPlayer = hwnd;
-	UpdateWindow( hwnd );
+	mHWNDPlayer = mHwnd;
+	UpdateWindow( mHwnd );
 
 	return TRUE;
 }
